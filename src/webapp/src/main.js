@@ -1,24 +1,38 @@
 import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+
+const exampleMaze = `S . . X G
+. X . X .
+. . . . .
+X X . X .
+. . . . .`;
 
 document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
+  <h2>Enter Maze</h2>
+  <textarea id="mazeInput" rows="10" cols="40">${exampleMaze}</textarea>
+  <br/>
+  <button id="submitMaze">Submit Maze</button>
+  <button id="clearMaze">Clear</button>
+  <div id="response"></div>
 `
 
-setupCounter(document.querySelector('#counter'))
+document.getElementById('submitMaze').addEventListener('click', async () => {
+  const mazeText = document.getElementById('mazeInput').value;
+
+  try {
+    const response = await fetch('/create_maze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ maze: mazeText }),
+    });
+
+    const result = await response.json();
+    document.getElementById('response').textContent = `Response: ${JSON.stringify(result, null, 2)}`;
+  } catch (err) {
+    document.getElementById('response').textContent = `Error: ${err.message}`;
+  }
+});
+
+document.getElementById('clearMaze').addEventListener('click', () => {
+  document.getElementById('mazeInput').value = '';
+  document.getElementById('response').textContent = '';
+});
