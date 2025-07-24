@@ -17,6 +17,9 @@ class Maze:
         if not np.any(self.grid == "G"):
             raise ValueError("Grid must contain a start position 'G'")
 
+        self.start = tuple(map(int, np.argwhere(self.grid == "S")[0]))
+        self.goal = tuple(map(int, np.argwhere(self.grid == "G")[0]))
+
     def is_valid_state(self, state):
         row, col = state
         if 0 <= row < self.rows and 0 <= col < self.cols:
@@ -31,6 +34,14 @@ class Maze:
         if self.is_valid_state(next_state):
             return next_state
         return state
+
+    def get_reward(self, state, action_idx, next_state):
+        if next_state == self.goal:
+            return 100
+        elif next_state == state:
+            return -10
+        else:
+            return -1
 
     def from_str(self, maze_str):
         rows = [r.split() for r in maze_str.strip().splitlines()]
@@ -52,7 +63,62 @@ class Maze:
             return "Grid not initialized."
         s = f"Grid ({self.rows}x{self.cols})\n"
         s += "\n".join([" ".join(r) for r in self.grid])
+        s += "\n" + f"Start at {self.start} and goal at {self.goal}"
         return s
+
+
+class QTableAgent:
+    def __init__(self, env, learning_rate=0.1, discount_factor=0.95, epsilon=0.1):
+        self.env = env
+        self.lr = learning_rate
+        self.gamma = discount_factor
+        self.epsilon = epsilon
+        self._init_q_table()
+
+    def _init_q_table(self):
+        self.q_table = np.zeros((self.env.rows, self.env.cols, len(self.env.actions)))
+        self.q_table[0, 0, 0] = 1
+        self.q_table[1, 0, 0] = 10
+
+    def epsilon_greedy_action(self, state):
+        if np.random.rand() < self.epsilon:
+            return np.random.randint(len(self.env.actions))
+        else:
+            # return the action_idx of the highest value action
+            return np.argmax(self.q_table[state])
+
+    def update_q_value(self, state, action, reward, next_state):
+        try:
+            max_next_q = np.max(self.q_table[next_state])
+        except IndexError:
+            print(f"{next_state} is outside q-table of shape {self.q_table.shape}.")
+
+        # Q(s,a) = Q(s,a) + α[r + γ*max(Q(s',a')) - Q(s,a)]
+        current_q = self.q_table[state][action]
+        new_q = current_q + self.lr * (reward + self.gamma * max_next_q - current_q)
+        self.q_table[state][action] = new_q
+
+    def train(self, episodes=1000):
+        episode_rewards = []
+
+        for episode in range(episodes):
+            state = self.env.start
+            total_reward = 0
+            steps = 0
+            max_steps = 100  # prevent infinite loops
+
+            while state != self.env.goal and steps < max_steps:
+                action = self.epsilon_greedy_action(state)
+                next_state = self.env.get_next_state(state, action)
+                reward = self.env.get_reward(state, action, next_state)
+                self.update_q_value(state, action, reward, next_state)
+                state = next_state
+                total_reward += reward
+                steps += 1
+
+            episode_rewards.append(total_reward)
+
+        return episode_rewards
 
 
 def main():
@@ -69,6 +135,12 @@ def main():
     print(maze)
     print()
     print(maze.get_next_state((0, 0), 1))
+
+    agent = QTableAgent(maze)
+    agent.train(10)
+
+    # agent.update_q_value((0, 0), 0, 1, (1, 0))
+    print(agent.q_table)
 
 
 if __name__ == "__main__":
