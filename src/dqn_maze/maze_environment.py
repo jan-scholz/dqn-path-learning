@@ -120,6 +120,13 @@ class QTableAgent:
 
         return episode_rewards
 
+    def get_policy_idx(self):
+        return np.argmax(self.q_table, axis=2)
+
+    def get_policy_name(self):
+        policy = self.get_policy_idx()
+        return np.array(self.env.action_names)[policy]
+
 
 def main():
     maze_str = """
@@ -141,6 +148,9 @@ def main():
 
     # agent.update_q_value((0, 0), 0, 1, (1, 0))
     print(agent.q_table)
+    print()
+    print(agent.get_policy_idx())
+    print(agent.get_policy_name())
 
 
 if __name__ == "__main__":
