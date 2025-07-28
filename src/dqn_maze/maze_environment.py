@@ -5,7 +5,7 @@ class Maze:
     def __init__(self):
         self.grid = None
         self.rows, self.cols = 0, 0
-        self.action_names = ["Up", "Down", "Left", "Right"]
+        self.action_names = ["up", "down", "left", "right"]
         self.actions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     def _initialize_grid(self, grid_list):
@@ -73,6 +73,9 @@ class QTableAgent:
         self.lr = learning_rate
         self.gamma = discount_factor
         self.epsilon = epsilon
+        self.state = None
+        self.rewards = []
+        self.step = None
         self._init_q_table()
 
     def _init_q_table(self):
@@ -127,6 +130,35 @@ class QTableAgent:
         policy = self.get_policy_idx()
         return np.array(self.env.action_names)[policy]
 
+    def train_step(self):
+        if self.state is None:
+            self.state = self.env.start
+        if self.step is None:
+            self.step = 0
+        else:
+            self.step += 1
+
+        action = self.epsilon_greedy_action(self.state)
+        next_state = self.env.get_next_state(self.state, action)
+        reward = self.env.get_reward(self.state, action, next_state)
+        self.update_q_value(self.state, action, reward, next_state)
+        self.rewards.append(reward)
+
+        params = {
+            "step": self.step,
+            "state": self.state,
+            "next_state": next_state,
+            "action": self.env.action_names[action],
+            "rewards": self.rewards,
+            "q_table": 0,
+        }
+
+        self.state = next_state
+        return params
+
+    def q_table_to_dict(self):
+        return self.q_table
+
 
 def main():
     maze_str = """
@@ -141,16 +173,18 @@ def main():
     maze.from_str(maze_str)
     print(maze)
     print()
-    print(maze.get_next_state((0, 0), 1))
+    # print(maze.get_next_state((0, 0), 1))
 
     agent = QTableAgent(maze)
-    agent.train(10)
+    # agent.train(10)
 
-    # agent.update_q_value((0, 0), 0, 1, (1, 0))
-    print(agent.q_table)
-    print()
-    print(agent.get_policy_idx())
-    print(agent.get_policy_name())
+    # print(agent.q_table)
+    # print()
+    # print(agent.get_policy_idx())
+    # print(agent.get_policy_name())
+
+    print(agent.train_step())
+    print(agent.train_step())
 
 
 if __name__ == "__main__":
