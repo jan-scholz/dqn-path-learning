@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 
 
@@ -68,14 +70,19 @@ class Maze:
 
 
 class QTableAgent:
-    def __init__(self, env, learning_rate=0.1, discount_factor=0.95, epsilon=0.1):
-        self.env = env
+    def __init__(self, learning_rate=0.1, discount_factor=0.95, epsilon=0.1):
+        self.env = None
         self.lr = learning_rate
         self.gamma = discount_factor
         self.epsilon = epsilon
         self.state = None
         self.rewards = []
         self.step = None
+
+    def add_environment(self, env):
+        # if self.env is None:
+        #     raise ValueError("Agent needs to be initialized with proper env.")
+        self.env = env
         self._init_q_table()
 
     def _init_q_table(self):
@@ -150,14 +157,30 @@ class QTableAgent:
             "next_state": next_state,
             "action": self.env.action_names[action],
             "rewards": self.rewards,
-            "q_table": 0,
+            "rows": self.env.rows,
+            "cols": self.env.cols,
+            "q_table": self.q_table_to_json(),
         }
 
         self.state = next_state
         return params
 
-    def q_table_to_dict(self):
-        return self.q_table
+    def q_table_to_json(self):
+        result = []
+        rows, cols, nactions = self.q_table.shape
+        for y in range(rows):
+            for x in range(cols):
+                cell = {
+                    "x": x,
+                    "y": y,
+                    "values": {
+                        action: float(self.q_table[y, x, i])
+                        for i, action in enumerate(self.env.action_names)
+                    },
+                }
+                result.append(cell)
+
+        return json.dumps(result)
 
 
 def main():
@@ -183,8 +206,8 @@ def main():
     # print(agent.get_policy_idx())
     # print(agent.get_policy_name())
 
-    print(agent.train_step())
-    print(agent.train_step())
+    # print(agent.train_step())
+    # print(agent.train_step())
 
 
 if __name__ == "__main__":

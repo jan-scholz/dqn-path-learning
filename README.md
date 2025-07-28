@@ -20,3 +20,11 @@ pip install hatch uv
 ```bash
 make run
 ```
+
+## Endpoints
+
+```bash
+curl -X POST http://localhost:8000/create_maze \
+  -H "Content-Type: application/json" \
+  -d '{"maze": "S . . X G\n. X . X .\n. . . . .\nX X . X .\n. . . . ."}'
+```

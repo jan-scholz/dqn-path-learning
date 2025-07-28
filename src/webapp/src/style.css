@@ -77,3 +77,43 @@ button:active {
   color: green;
   white-space: pre-wrap;
 }
+
+.grid-container {
+  margin-top: 2rem;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  padding: 4px;
+  background-color: #f9f9f9;
+  font-size: 0.75rem;
+  text-align: center;
+  height: 60px;
+  box-sizing: border-box;
+}
+
+.q-grid {
+  display: grid;
+  grid-template-areas:
+    "up up"
+    "left right"
+    "down down";
+  gap: 2px;
+}
+
+.q.up {
+  grid-area: up;
+}
+.q.down {
+  grid-area: down;
+}
+.q.left {
+  grid-area: left;
+}
+.q.right {
+  grid-area: right;
+}
+
+.q {
+  font-family: monospace;
+}
