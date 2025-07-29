@@ -78,6 +78,17 @@ button:disabled {
   background-color: #4b5563; /* Gray-600 */
 }
 
+#trainingControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+#trainingControls button {
+  margin-top: 0;
+}
+
 #response {
   margin-top: 1rem;
   color: green;
