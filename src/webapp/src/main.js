@@ -10,18 +10,23 @@ let mazeData = null;
 
 document.querySelector('#app').innerHTML = `
   <h2>Enter Maze</h2>
-  <textarea id="mazeInput" rows="10" cols="40">${exampleMaze}</textarea>
+  <textarea id="mazeInput" rows="6" cols="40">${exampleMaze}</textarea>
   <br/>
   <button id="submitMaze">Submit Maze</button>
   <button id="clearMaze">Clear</button>
   <button id="trainStep">Train Step</button>
   <button id="train10Steps">Train 10 Steps</button>
+  <div id="goalMessage" style="display: none; color: green; margin-top: 1rem;">Goal Reached!</div>
   <div id="grid" class="grid-container"></div>
 `
 
 document.getElementById('submitMaze').addEventListener('click', async () => {
   const mazeText = document.getElementById('mazeInput').value;
   mazeData = mazeText.split('\n').map(row => row.split(' ').filter(c => c));
+
+  document.getElementById('trainStep').disabled = false;
+  document.getElementById('train10Steps').disabled = false;
+  document.getElementById('goalMessage').style.display = 'none';
 
   try {
     const response = await fetch('/create_maze', {
@@ -40,6 +45,9 @@ document.getElementById('clearMaze').addEventListener('click', () => {
   document.getElementById('mazeInput').value = '';
   mazeData = null;
   document.getElementById('grid').innerHTML = '';
+  document.getElementById('trainStep').disabled = false;
+  document.getElementById('train10Steps').disabled = false;
+  document.getElementById('goalMessage').style.display = 'none';
 });
 
 document.getElementById('trainStep').addEventListener('click', async () => {
@@ -47,6 +55,12 @@ document.getElementById('trainStep').addEventListener('click', async () => {
     const response = await fetch('/train_step', { method: 'POST' });
     const data = await response.json();
     renderQGrid(data.q_table, data.rows, data.cols);
+    if (data.goal_reached) {
+      document.getElementById('goalMessage').innerText = `Goal Reached in ${data.step} steps!`;
+      document.getElementById('goalMessage').style.display = 'block';
+      document.getElementById('trainStep').disabled = true;
+      document.getElementById('train10Steps').disabled = true;
+    }
   } catch (err) {
     alert(`Train step failed: ${err.message}`);
   }
@@ -58,8 +72,15 @@ document.getElementById('train10Steps').addEventListener('click', async () => {
     for (let i = 0; i < 10; i++) {
       const response = await fetch('/train_step', { method: 'POST' });
       data = await response.json();
+      if (data.goal_reached) break;
     }
     renderQGrid(data.q_table, data.rows, data.cols);
+    if (data.goal_reached) {
+      document.getElementById('goalMessage').innerText = `Goal Reached in ${data.step} steps!`;
+      document.getElementById('goalMessage').style.display = 'block';
+      document.getElementById('trainStep').disabled = true;
+      document.getElementById('train10Steps').disabled = true;
+    }
   } catch (err) {
     alert(`Train step failed: ${err.message}`);
   }

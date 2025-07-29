@@ -63,6 +63,12 @@ button:active {
   transform: scale(0.98);
 }
 
+button:disabled {
+  background-color: #9ca3af; /* Gray-400 */
+  cursor: not-allowed;
+}
+
+
 #clearMaze {
   margin-left: 0.5rem;
   background-color: #6b7280; /* Gray-500 */
