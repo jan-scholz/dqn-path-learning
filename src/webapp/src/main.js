@@ -16,10 +16,11 @@ document.querySelector('#app').innerHTML = `
   <button id="clearMaze">Clear Maze</button>
 
   <h2>Train Agent</h2>
+  <div id="trainingStatus">Step: 0</div>
   <div id="trainingControls">
-    <div id="trainingStatus">Step: 0</div>
     <button id="trainStep">Train Step</button>
     <button id="train10Steps">Train 10 Steps</button>
+    <button id="trainEpisode">Train Episode</button>
   </div>
   <div id="grid" class="grid-container"></div>
 `
@@ -30,6 +31,7 @@ document.getElementById('submitMaze').addEventListener('click', async () => {
 
   document.getElementById('trainStep').disabled = false;
   document.getElementById('train10Steps').disabled = false;
+  document.getElementById('trainEpisode').disabled = false;
   document.getElementById('trainingStatus').innerText = `Step: 0`;
 
   try {
@@ -51,6 +53,7 @@ document.getElementById('clearMaze').addEventListener('click', () => {
   document.getElementById('grid').innerHTML = '';
   document.getElementById('trainStep').disabled = false;
   document.getElementById('train10Steps').disabled = false;
+  document.getElementById('trainEpisode').disabled = false;
   document.getElementById('trainingStatus').innerText = `Step: 0`;
 });
 
@@ -63,6 +66,7 @@ document.getElementById('trainStep').addEventListener('click', async () => {
       document.getElementById('trainingStatus').innerText = `Goal Reached in ${data.step} steps!`;
       document.getElementById('trainStep').disabled = true;
       document.getElementById('train10Steps').disabled = true;
+      document.getElementById('trainEpisode').disabled = true;
     } else {
       document.getElementById('trainingStatus').innerText = `Step: ${data.step}`;
     }
@@ -84,6 +88,29 @@ document.getElementById('train10Steps').addEventListener('click', async () => {
       document.getElementById('trainingStatus').innerText = `Goal Reached in ${data.step} steps!`;
       document.getElementById('trainStep').disabled = true;
       document.getElementById('train10Steps').disabled = true;
+      document.getElementById('trainEpisode').disabled = true;
+    } else {
+      document.getElementById('trainingStatus').innerText = `Step: ${data.step}`;
+    }
+  } catch (err) {
+    alert(`Train step failed: ${err.message}`);
+  }
+});
+
+document.getElementById('trainEpisode').addEventListener('click', async () => {
+  try {
+    let data;
+    while (true) {
+      const response = await fetch('/train_step', { method: 'POST' });
+      data = await response.json();
+      if (data.goal_reached) break;
+    }
+    renderQGrid(data.q_table, data.rows, data.cols);
+    if (data.goal_reached) {
+      document.getElementById('trainingStatus').innerText = `Goal Reached in ${data.step} steps!`;
+      document.getElementById('trainStep').disabled = true;
+      document.getElementById('train10Steps').disabled = true;
+      document.getElementById('trainEpisode').disabled = true;
     } else {
       document.getElementById('trainingStatus').innerText = `Step: ${data.step}`;
     }

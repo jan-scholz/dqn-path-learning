@@ -30,7 +30,7 @@ body {
 #app {
   max-width: 600px;
   margin: auto;
-  padding: 2rem;
+  padding: 0rem 2rem 2rem 2rem;
 }
 
 textarea {
@@ -68,7 +68,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-
 #clearMaze {
   margin-left: 0.5rem;
   background-color: #6b7280; /* Gray-500 */
@@ -78,15 +77,17 @@ button:disabled {
   background-color: #4b5563; /* Gray-600 */
 }
 
-#trainingControls {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+#trainingStatus {
   margin-top: 1rem;
+}
+
+#trainingControls {
+  margin-top: 0.5rem;
 }
 
 #trainingControls button {
   margin-top: 0;
+  margin-right: 0.5rem;
 }
 
 #response {
@@ -155,4 +156,3 @@ button:disabled {
 .q-right {
   justify-content: flex-end;
 }
-
