@@ -160,6 +160,7 @@ class QTableAgent:
             "rows": self.env.rows,
             "cols": self.env.cols,
             "q_table": self.q_table_to_json(),
+            "goal_reached": next_state == self.env.goal,
         }
 
         self.state = next_state
